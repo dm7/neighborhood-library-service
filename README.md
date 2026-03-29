@@ -14,6 +14,34 @@ docker compose up --build
 - gRPC: `localhost:50051` (internal `LibraryService`, standard health service)  
 - Frontend: http://localhost:3000  
 
+## Database (PostgreSQL)
+
+Schema and seed live under `db/migrations/` (`001_schema.sql`, `002_seed.sql`). On first container start, Postgres runs `db/init/*.sh` and SQL in order; `99_apply_migrations.sh` applies every `*.sql` file from the mounted migrations directory, so a **new** volume gets tables + seed automatically.
+
+**Reproduce from scratch (recommended when schema changes):**
+
+```bash
+docker compose down -v
+docker compose up -d postgres
+# wait until healthy, then optionally bring up the rest:
+docker compose up --build
+```
+
+**Apply migrations to an already-running local Postgres** (requires [`psql`](https://www.postgresql.org/docs/current/app-psql.html); uses `POSTGRES_DSN` from the environment or the default in `.env.example`):
+
+```bash
+export POSTGRES_DSN="${POSTGRES_DSN:-postgresql://library:library@localhost:5432/library}"
+./scripts/db-migrate.sh
+```
+
+`GET /health/ready` treats Postgres as ready only when it can connect and the core tables `books`, `members`, `book_copies`, and `borrow_records` exist.
+
+**Optional pytest against a live DB** (same DSN as the gateway):
+
+```bash
+cd rest_gateway && pip install -e ".[dev]" && POSTGRES_DSN="$POSTGRES_DSN" pytest tests/test_db_schema.py -v
+```
+
 ## Tests
 
 ```bash

@@ -17,7 +17,7 @@ Two Python processes, orchestrated by Docker Compose:
 
 | Store | Purpose |
 |-------|---------|
-| **PostgreSQL** | Normalized library domain data: books, members, loans, holds, etc. |
+| **PostgreSQL** | Normalized library domain data. **Day 2:** `books`, `members`, `book_copies` (physical items), `borrow_records` (loans; partial unique index enforces one open loan per copy). Migrations + seed: `db/migrations/`. |
 | **MongoDB** | **Operational and analytics-oriented events** — startup, readiness probes, RPC markers, and future metrics-friendly documents. Not the system of record for lending state. |
 
 ### MongoDB event schema (`library_ops.service_events`)

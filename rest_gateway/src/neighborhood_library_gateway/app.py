@@ -41,11 +41,11 @@ def ready() -> dict[str, object]:
     """
     Readiness: dependencies used for clear operational matrices.
     - grpc: internal LibraryService.Ping
-    - postgres: catalog connection (future domain data)
+    - postgres: connection + Day 2 domain tables present
     - mongodb: event sink (optional if MONGODB_URI unset)
     """
     grpc_ok, grpc_detail = ping_internal()
-    postgres_ok = _postgres_ping()
+    postgres_ok = _postgres_domain_ready()
     mongo_configured = bool(os.environ.get("MONGODB_URI", "").strip())
     mongo_ok = _mongo_ping() if mongo_configured else None
 
@@ -63,18 +63,27 @@ def ready() -> dict[str, object]:
     return {"status": "ready" if overall else "degraded", "checks": checks}
 
 
-def _postgres_ping() -> bool:
+def _postgres_domain_ready() -> bool:
+    """True when Postgres accepts connections and core library tables exist."""
     dsn = os.environ.get("POSTGRES_DSN", "").strip()
     if not dsn:
         return False
     try:
         with psycopg.connect(dsn, connect_timeout=3) as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT 1")
-                cur.fetchone()
-        return True
+                cur.execute(
+                    """
+                    SELECT COUNT(*)::int FROM information_schema.tables
+                    WHERE table_schema = 'public'
+                      AND table_name IN (
+                        'books', 'members', 'book_copies', 'borrow_records'
+                      )
+                    """
+                )
+                row = cur.fetchone()
+                return row is not None and row[0] == 4
     except psycopg.Error as exc:
-        _LOG.warning("postgres ping failed: %s", exc)
+        _LOG.warning("postgres domain readiness check failed: %s", exc)
         return False
 
 
