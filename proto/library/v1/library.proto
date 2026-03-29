@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package library.v1;
+
+// Internal gRPC surface. Borrow/lend flows will be chatty here (many small RPCs);
+// the REST gateway stays a coarse external API.
+
+message Empty {}
+
+message Pong {
+  string message = 1;
+}
+
+service LibraryService {
+  // Connectivity check for split-runtime health and tests.
+  rpc Ping(Empty) returns (Pong);
+}

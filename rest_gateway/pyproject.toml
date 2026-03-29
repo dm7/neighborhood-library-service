@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neighborhood-library-rest-gateway"
+version = "0.1.0"
+description = "External REST gateway for Neighborhood Library"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.109",
+  "uvicorn[standard]>=0.27",
+  "grpcio>=1.78",
+  "pymongo>=4.6",
+  "psycopg[binary]>=3.1",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["httpx>=0.26", "pytest>=8.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

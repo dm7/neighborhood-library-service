@@ -1,0 +1,11 @@
+{
+  "name": "neighborhood-library-service",
+  "private": true,
+  "description": "Monorepo: gRPC, REST gateway, frontend, proto",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

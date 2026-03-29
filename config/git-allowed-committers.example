@@ -1,0 +1,9 @@
+# Copy to git-allowed-committers (ignored by Git) and list one allowed email per line.
+# Commits are rejected if user.email is not listed (when that file exists).
+#
+#   cp config/git-allowed-committers.example config/git-allowed-committers
+#   $EDITOR config/git-allowed-committers
+#
+# Example:
+# contributor@example.com
+# other@example.com

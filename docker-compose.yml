@@ -1,0 +1,82 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: library
+      POSTGRES_PASSWORD: library
+      POSTGRES_DB: library
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U library -d library"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "localhost/test", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  grpc_service:
+    build:
+      context: .
+      dockerfile: grpc_service/Dockerfile
+    environment:
+      GRPC_BIND_HOST: 0.0.0.0
+      GRPC_PORT: "50051"
+      MONGODB_URI: mongodb://mongo:27017
+      MONGODB_DB: library_ops
+      LOG_LEVEL: INFO
+    ports:
+      - "50051:50051"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  rest_gateway:
+    build:
+      context: .
+      dockerfile: rest_gateway/Dockerfile
+    environment:
+      REST_BIND_HOST: 0.0.0.0
+      REST_PORT: "8080"
+      GRPC_TARGET: grpc_service:50051
+      POSTGRES_DSN: postgresql://library:library@postgres:5432/library
+      MONGODB_URI: mongodb://mongo:27017
+      MONGODB_DB: library_ops
+      LOG_LEVEL: INFO
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      grpc_service:
+        condition: service_started
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      NEXT_PUBLIC_API_BASE: http://localhost:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      - rest_gateway
+
+volumes:
+  postgres_data:
+  mongo_data:

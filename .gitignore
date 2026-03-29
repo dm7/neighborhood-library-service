@@ -1,0 +1,82 @@
+# --- Environment & secrets ---
+.env
+.env.*
+!.env.example
+*.local
+
+# Local list of emails allowed to pass the Husky committer check (see config/*.example)
+config/git-allowed-committers
+
+# --- Python (all packages) ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+.venv*/
+venv/
+ENV/
+env/
+*.egg-info/
+.eggs/
+dist/
+build/
+pip-wheel-metadata/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+cython_debug/
+*.cover
+htmlcov/
+.coverage
+.coverage.*
+.tox/
+.nox/
+.hypothesis/
+
+# Virtualenvs inside service folders
+grpc_service/.venv/
+grpc_service/.venv*/
+rest_gateway/.venv/
+rest_gateway/.venv*/
+
+# --- Node.js ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tgz
+
+# User-requested: do not commit frontend lockfile
+frontend/package-lock.json
+
+# --- Next.js (frontend) ---
+frontend/.next/
+frontend/out/
+frontend/.turbo/
+
+# --- OS & editors ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# --- Assignment / local PDFs (do not commit) ---
+Neighborhood Library App*.pdf
+*Take-Home*.pdf
+
+# --- Docker / local overrides ---
+docker-compose.override.yml
+*.override.yml
+
+# --- Logs & temp ---
+*.log
+tmp/
+temp/
+.cache/
