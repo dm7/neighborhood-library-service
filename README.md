@@ -44,7 +44,13 @@ This repository is intended to track [dm7/neighborhood-library-service](https://
 | `production` | What you deploy or tag for production (promote from `staging` when ready). |
 | `feature/*` | Short-lived work (e.g. `feature/scaffolding-split-runtime`). |
 
-Initial scaffold work is committed on **`feature/scaffolding-split-runtime`**; long-lived branches above were created at the same tip so you can merge or reset them as your process requires.
+Work for **Scaffolding + split runtime** should be committed on **`feature/scaffolding-split-runtime`** (that is the current branch if you followed the repo setup). After your first commit, create the other long-lived branches at the same revision:
+
+```bash
+./scripts/git-create-workflow-branches.sh
+```
+
+That adds `main`, `development`, `staging`, `testing`, and `production` when they do not already exist. Merge or reset them to match your team’s promotion rules.
 
 ### Hooks and “restricted” committers (local)
 
