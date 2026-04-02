@@ -1,1 +1,1 @@
--- Reserved for PostgreSQL extensions and reference data (Day 2+).
+-- Optional PostgreSQL extensions (run before numbered shell scripts). Schema is in ../migrations.

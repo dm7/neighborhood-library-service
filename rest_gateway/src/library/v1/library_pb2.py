@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18library/v1/library.proto\x12\nlibrary.v1\"\x07\n\x05\x45mpty\"\x17\n\x04Pong\x12\x0f\n\x07message\x18\x01 \x01(\t2=\n\x0eLibraryService\x12+\n\x04Ping\x12\x11.library.v1.Empty\x1a\x10.library.v1.Pongb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18library/v1/library.proto\x12\nlibrary.v1\"\x07\n\x05\x45mpty\"\x17\n\x04Pong\x12\x0f\n\x07message\x18\x01 \x01(\t\"k\n\x04\x42ook\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05title\x18\x02 \x01(\t\x12\x0e\n\x06\x61uthor\x18\x03 \x01(\t\x12\x0c\n\x04isbn\x18\x04 \x01(\t\x12\x16\n\x0epublished_year\x18\x05 \x01(\x05\x12\x12\n\ncreated_at\x18\x06 \x01(\t\"Y\n\x06Member\x12\n\n\x02id\x18\x01 \x01(\t\x12\x11\n\tfull_name\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\r\n\x05phone\x18\x04 \x01(\t\x12\x12\n\ncreated_at\x18\x05 \x01(\t\"H\n\x08\x42ookCopy\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0f\n\x07\x62ook_id\x18\x02 \x01(\t\x12\x0f\n\x07\x62\x61rcode\x18\x03 \x01(\t\x12\x0e\n\x06status\x18\x04 \x01(\t\"\x87\x01\n\x0c\x42orrowRecord\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0f\n\x07\x63opy_id\x18\x02 \x01(\t\x12\x11\n\tmember_id\x18\x03 \x01(\t\x12\x13\n\x0b\x62orrowed_at\x18\x04 \x01(\t\x12\x0e\n\x06\x64ue_at\x18\x05 \x01(\t\x12\x13\n\x0breturned_at\x18\x06 \x01(\t\x12\r\n\x05notes\x18\x07 \x01(\t\"\x1c\n\x0eGetBookRequest\x12\n\n\x02id\x18\x01 \x01(\t\"1\n\x10ListBooksRequest\x12\r\n\x05limit\x18\x01 \x01(\x05\x12\x0e\n\x06offset\x18\x02 \x01(\x05\"4\n\x11ListBooksResponse\x12\x1f\n\x05\x62ooks\x18\x01 \x03(\x0b\x32\x10.library.v1.Book\"X\n\x11\x43reateBookRequest\x12\r\n\x05title\x18\x01 \x01(\t\x12\x0e\n\x06\x61uthor\x18\x02 \x01(\t\x12\x0c\n\x04isbn\x18\x03 \x01(\t\x12\x16\n\x0epublished_year\x18\x04 \x01(\x05\"d\n\x11UpdateBookRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05title\x18\x02 \x01(\t\x12\x0e\n\x06\x61uthor\x18\x03 \x01(\t\x12\x0c\n\x04isbn\x18\x04 \x01(\t\x12\x16\n\x0epublished_year\x18\x05 \x01(\x05\"\x1f\n\x11\x44\x65leteBookRequest\x12\n\n\x02id\x18\x01 \x01(\t\"%\n\x12\x44\x65leteBookResponse\x12\x0f\n\x07\x64\x65leted\x18\x01 \x01(\x08\"\x1e\n\x10GetMemberRequest\x12\n\n\x02id\x18\x01 \x01(\t\"3\n\x12ListMembersRequest\x12\r\n\x05limit\x18\x01 \x01(\x05\x12\x0e\n\x06offset\x18\x02 \x01(\x05\":\n\x13ListMembersResponse\x12#\n\x07members\x18\x01 \x03(\x0b\x32\x12.library.v1.Member\"F\n\x13\x43reateMemberRequest\x12\x11\n\tfull_name\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\x12\r\n\x05phone\x18\x03 \x01(\t\"R\n\x13UpdateMemberRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x11\n\tfull_name\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\r\n\x05phone\x18\x04 \x01(\t\"!\n\x13\x44\x65leteMemberRequest\x12\n\n\x02id\x18\x01 \x01(\t\"\'\n\x14\x44\x65leteMemberResponse\x12\x0f\n\x07\x64\x65leted\x18\x01 \x01(\x08\"2\n\x1d\x43heckMemberEligibilityRequest\x12\x11\n\tmember_id\x18\x01 \x01(\t\"B\n\x1e\x43heckMemberEligibilityResponse\x12\x10\n\x08\x65ligible\x18\x01 \x01(\x08\x12\x0e\n\x06reason\x18\x02 \x01(\t\"/\n\x1c\x43heckCopyAvailabilityRequest\x12\x0f\n\x07\x63opy_id\x18\x01 \x01(\t\"B\n\x1d\x43heckCopyAvailabilityResponse\x12\x11\n\tavailable\x18\x01 \x01(\x08\x12\x0e\n\x06reason\x18\x02 \x01(\t\"H\n\x12StartBorrowRequest\x12\x11\n\tmember_id\x18\x01 \x01(\t\x12\x0f\n\x07\x63opy_id\x18\x02 \x01(\t\x12\x0e\n\x06\x64ue_at\x18\x03 \x01(\t\"F\n\x13StartBorrowResponse\x12/\n\rborrow_record\x18\x01 \x01(\x0b\x32\x18.library.v1.BorrowRecord\"(\n\x15MarkCopyOnLoanRequest\x12\x0f\n\x07\x63opy_id\x18\x01 \x01(\t\"$\n\x16MarkCopyOnLoanResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\"-\n\x1aGetOpenBorrowByCopyRequest\x12\x0f\n\x07\x63opy_id\x18\x01 \x01(\t\"D\n\x13ReturnBorrowRequest\x12\x18\n\x10\x62orrow_record_id\x18\x01 \x01(\t\x12\x13\n\x0breturned_at\x18\x02 \x01(\t\"G\n\x14ReturnBorrowResponse\x12/\n\rborrow_record\x18\x01 \x01(\x0b\x32\x18.library.v1.BorrowRecord\"+\n\x18MarkCopyAvailableRequest\x12\x0f\n\x07\x63opy_id\x18\x01 \x01(\t\"\'\n\x19MarkCopyAvailableResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\x32=\n\x0eLibraryService\x12+\n\x04Ping\x12\x11.library.v1.Empty\x1a\x10.library.v1.Pong2\xdb\x02\n\x0b\x42ookService\x12\x37\n\x07GetBook\x12\x1a.library.v1.GetBookRequest\x1a\x10.library.v1.Book\x12H\n\tListBooks\x12\x1c.library.v1.ListBooksRequest\x1a\x1d.library.v1.ListBooksResponse\x12=\n\nCreateBook\x12\x1d.library.v1.CreateBookRequest\x1a\x10.library.v1.Book\x12=\n\nUpdateBook\x12\x1d.library.v1.UpdateBookRequest\x1a\x10.library.v1.Book\x12K\n\nDeleteBook\x12\x1d.library.v1.DeleteBookRequest\x1a\x1e.library.v1.DeleteBookResponse2\xfb\x02\n\rMemberService\x12=\n\tGetMember\x12\x1c.library.v1.GetMemberRequest\x1a\x12.library.v1.Member\x12N\n\x0bListMembers\x12\x1e.library.v1.ListMembersRequest\x1a\x1f.library.v1.ListMembersResponse\x12\x43\n\x0c\x43reateMember\x12\x1f.library.v1.CreateMemberRequest\x1a\x12.library.v1.Member\x12\x43\n\x0cUpdateMember\x12\x1f.library.v1.UpdateMemberRequest\x1a\x12.library.v1.Member\x12Q\n\x0c\x44\x65leteMember\x12\x1f.library.v1.DeleteMemberRequest\x1a .library.v1.DeleteMemberResponse2\xa6\x05\n\x0eLendingService\x12o\n\x16\x43heckMemberEligibility\x12).library.v1.CheckMemberEligibilityRequest\x1a*.library.v1.CheckMemberEligibilityResponse\x12l\n\x15\x43heckCopyAvailability\x12(.library.v1.CheckCopyAvailabilityRequest\x1a).library.v1.CheckCopyAvailabilityResponse\x12N\n\x0bStartBorrow\x12\x1e.library.v1.StartBorrowRequest\x1a\x1f.library.v1.StartBorrowResponse\x12W\n\x0eMarkCopyOnLoan\x12!.library.v1.MarkCopyOnLoanRequest\x1a\".library.v1.MarkCopyOnLoanResponse\x12W\n\x13GetOpenBorrowByCopy\x12&.library.v1.GetOpenBorrowByCopyRequest\x1a\x18.library.v1.BorrowRecord\x12Q\n\x0cReturnBorrow\x12\x1f.library.v1.ReturnBorrowRequest\x1a .library.v1.ReturnBorrowResponse\x12`\n\x11MarkCopyAvailable\x12$.library.v1.MarkCopyAvailableRequest\x1a%.library.v1.MarkCopyAvailableResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -35,6 +35,74 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_EMPTY']._serialized_end=47
   _globals['_PONG']._serialized_start=49
   _globals['_PONG']._serialized_end=72
-  _globals['_LIBRARYSERVICE']._serialized_start=74
-  _globals['_LIBRARYSERVICE']._serialized_end=135
+  _globals['_BOOK']._serialized_start=74
+  _globals['_BOOK']._serialized_end=181
+  _globals['_MEMBER']._serialized_start=183
+  _globals['_MEMBER']._serialized_end=272
+  _globals['_BOOKCOPY']._serialized_start=274
+  _globals['_BOOKCOPY']._serialized_end=346
+  _globals['_BORROWRECORD']._serialized_start=349
+  _globals['_BORROWRECORD']._serialized_end=484
+  _globals['_GETBOOKREQUEST']._serialized_start=486
+  _globals['_GETBOOKREQUEST']._serialized_end=514
+  _globals['_LISTBOOKSREQUEST']._serialized_start=516
+  _globals['_LISTBOOKSREQUEST']._serialized_end=565
+  _globals['_LISTBOOKSRESPONSE']._serialized_start=567
+  _globals['_LISTBOOKSRESPONSE']._serialized_end=619
+  _globals['_CREATEBOOKREQUEST']._serialized_start=621
+  _globals['_CREATEBOOKREQUEST']._serialized_end=709
+  _globals['_UPDATEBOOKREQUEST']._serialized_start=711
+  _globals['_UPDATEBOOKREQUEST']._serialized_end=811
+  _globals['_DELETEBOOKREQUEST']._serialized_start=813
+  _globals['_DELETEBOOKREQUEST']._serialized_end=844
+  _globals['_DELETEBOOKRESPONSE']._serialized_start=846
+  _globals['_DELETEBOOKRESPONSE']._serialized_end=883
+  _globals['_GETMEMBERREQUEST']._serialized_start=885
+  _globals['_GETMEMBERREQUEST']._serialized_end=915
+  _globals['_LISTMEMBERSREQUEST']._serialized_start=917
+  _globals['_LISTMEMBERSREQUEST']._serialized_end=968
+  _globals['_LISTMEMBERSRESPONSE']._serialized_start=970
+  _globals['_LISTMEMBERSRESPONSE']._serialized_end=1028
+  _globals['_CREATEMEMBERREQUEST']._serialized_start=1030
+  _globals['_CREATEMEMBERREQUEST']._serialized_end=1100
+  _globals['_UPDATEMEMBERREQUEST']._serialized_start=1102
+  _globals['_UPDATEMEMBERREQUEST']._serialized_end=1184
+  _globals['_DELETEMEMBERREQUEST']._serialized_start=1186
+  _globals['_DELETEMEMBERREQUEST']._serialized_end=1219
+  _globals['_DELETEMEMBERRESPONSE']._serialized_start=1221
+  _globals['_DELETEMEMBERRESPONSE']._serialized_end=1260
+  _globals['_CHECKMEMBERELIGIBILITYREQUEST']._serialized_start=1262
+  _globals['_CHECKMEMBERELIGIBILITYREQUEST']._serialized_end=1312
+  _globals['_CHECKMEMBERELIGIBILITYRESPONSE']._serialized_start=1314
+  _globals['_CHECKMEMBERELIGIBILITYRESPONSE']._serialized_end=1380
+  _globals['_CHECKCOPYAVAILABILITYREQUEST']._serialized_start=1382
+  _globals['_CHECKCOPYAVAILABILITYREQUEST']._serialized_end=1429
+  _globals['_CHECKCOPYAVAILABILITYRESPONSE']._serialized_start=1431
+  _globals['_CHECKCOPYAVAILABILITYRESPONSE']._serialized_end=1497
+  _globals['_STARTBORROWREQUEST']._serialized_start=1499
+  _globals['_STARTBORROWREQUEST']._serialized_end=1571
+  _globals['_STARTBORROWRESPONSE']._serialized_start=1573
+  _globals['_STARTBORROWRESPONSE']._serialized_end=1643
+  _globals['_MARKCOPYONLOANREQUEST']._serialized_start=1645
+  _globals['_MARKCOPYONLOANREQUEST']._serialized_end=1685
+  _globals['_MARKCOPYONLOANRESPONSE']._serialized_start=1687
+  _globals['_MARKCOPYONLOANRESPONSE']._serialized_end=1723
+  _globals['_GETOPENBORROWBYCOPYREQUEST']._serialized_start=1725
+  _globals['_GETOPENBORROWBYCOPYREQUEST']._serialized_end=1770
+  _globals['_RETURNBORROWREQUEST']._serialized_start=1772
+  _globals['_RETURNBORROWREQUEST']._serialized_end=1840
+  _globals['_RETURNBORROWRESPONSE']._serialized_start=1842
+  _globals['_RETURNBORROWRESPONSE']._serialized_end=1913
+  _globals['_MARKCOPYAVAILABLEREQUEST']._serialized_start=1915
+  _globals['_MARKCOPYAVAILABLEREQUEST']._serialized_end=1958
+  _globals['_MARKCOPYAVAILABLERESPONSE']._serialized_start=1960
+  _globals['_MARKCOPYAVAILABLERESPONSE']._serialized_end=1999
+  _globals['_LIBRARYSERVICE']._serialized_start=2001
+  _globals['_LIBRARYSERVICE']._serialized_end=2062
+  _globals['_BOOKSERVICE']._serialized_start=2065
+  _globals['_BOOKSERVICE']._serialized_end=2412
+  _globals['_MEMBERSERVICE']._serialized_start=2415
+  _globals['_MEMBERSERVICE']._serialized_end=2794
+  _globals['_LENDINGSERVICE']._serialized_start=2797
+  _globals['_LENDINGSERVICE']._serialized_end=3475
 # @@protoc_insertion_point(module_scope)

@@ -6,6 +6,9 @@ OUT_GRPC="${ROOT}/grpc_service/src"
 OUT_REST="${ROOT}/rest_gateway/src"
 
 for OUT in "${OUT_GRPC}" "${OUT_REST}"; do
+  if [[ ! -d "${OUT}" ]]; then
+    continue
+  fi
   python3 -m grpc_tools.protoc \
     -I"${PROTO_DIR}" \
     --python_out="${OUT}" \
@@ -13,6 +16,11 @@ for OUT in "${OUT_GRPC}" "${OUT_REST}"; do
     "${PROTO_DIR}/library/v1/library.proto"
 done
 
-mkdir -p "${OUT_GRPC}/library/v1" "${OUT_REST}/library/v1"
-touch "${OUT_GRPC}/library/__init__.py" "${OUT_GRPC}/library/v1/__init__.py"
-touch "${OUT_REST}/library/__init__.py" "${OUT_REST}/library/v1/__init__.py"
+if [[ -d "${OUT_GRPC}" ]]; then
+  mkdir -p "${OUT_GRPC}/library/v1"
+  touch "${OUT_GRPC}/library/__init__.py" "${OUT_GRPC}/library/v1/__init__.py"
+fi
+if [[ -d "${OUT_REST}" ]]; then
+  mkdir -p "${OUT_REST}/library/v1"
+  touch "${OUT_REST}/library/__init__.py" "${OUT_REST}/library/v1/__init__.py"
+fi
