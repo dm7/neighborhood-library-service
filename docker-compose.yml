@@ -36,6 +36,7 @@ services:
     environment:
       GRPC_BIND_HOST: 0.0.0.0
       GRPC_PORT: "50051"
+      POSTGRES_DSN: postgresql://library:library@postgres:5432/library
       MONGODB_URI: mongodb://mongo:27017
       MONGODB_DB: library_ops
       LOG_LEVEL: INFO

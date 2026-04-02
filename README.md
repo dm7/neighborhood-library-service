@@ -14,6 +14,14 @@ docker compose up --build
 - gRPC: `localhost:50051` (internal `LibraryService`, standard health service)  
 - Frontend: http://localhost:3000  
 
+## Day 3 interfaces
+
+- External REST (gateway): `GET/POST/PUT /books`, `GET/POST/PUT /members`
+- Internal gRPC-only:
+  - `BookService` CRUD RPCs
+  - `MemberService` CRUD RPCs
+  - `LendingService` chatty borrow/return RPC workflow
+
 ## Database (PostgreSQL)
 
 Schema and seed live under `db/migrations/` (`001_schema.sql`, `002_seed.sql`). On first container start, Postgres runs `db/init/*.sh` and SQL in order; `99_apply_migrations.sh` applies every `*.sql` file from the mounted migrations directory, so a **new** volume gets tables + seed automatically.

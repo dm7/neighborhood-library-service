@@ -11,7 +11,194 @@ message Pong {
   string message = 1;
 }
 
+message Book {
+  string id = 1;
+  string title = 2;
+  string author = 3;
+  string isbn = 4;
+  int32 published_year = 5;
+  string created_at = 6;
+}
+
+message Member {
+  string id = 1;
+  string full_name = 2;
+  string email = 3;
+  string phone = 4;
+  string created_at = 5;
+}
+
+message BookCopy {
+  string id = 1;
+  string book_id = 2;
+  string barcode = 3;
+  string status = 4;
+}
+
+message BorrowRecord {
+  string id = 1;
+  string copy_id = 2;
+  string member_id = 3;
+  string borrowed_at = 4;
+  string due_at = 5;
+  string returned_at = 6;
+  string notes = 7;
+}
+
+message GetBookRequest {
+  string id = 1;
+}
+
+message ListBooksRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
+message ListBooksResponse {
+  repeated Book books = 1;
+}
+
+message CreateBookRequest {
+  string title = 1;
+  string author = 2;
+  string isbn = 3;
+  int32 published_year = 4;
+}
+
+message UpdateBookRequest {
+  string id = 1;
+  string title = 2;
+  string author = 3;
+  string isbn = 4;
+  int32 published_year = 5;
+}
+
+message DeleteBookRequest {
+  string id = 1;
+}
+
+message DeleteBookResponse {
+  bool deleted = 1;
+}
+
+message GetMemberRequest {
+  string id = 1;
+}
+
+message ListMembersRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
+message ListMembersResponse {
+  repeated Member members = 1;
+}
+
+message CreateMemberRequest {
+  string full_name = 1;
+  string email = 2;
+  string phone = 3;
+}
+
+message UpdateMemberRequest {
+  string id = 1;
+  string full_name = 2;
+  string email = 3;
+  string phone = 4;
+}
+
+message DeleteMemberRequest {
+  string id = 1;
+}
+
+message DeleteMemberResponse {
+  bool deleted = 1;
+}
+
+message CheckMemberEligibilityRequest {
+  string member_id = 1;
+}
+
+message CheckMemberEligibilityResponse {
+  bool eligible = 1;
+  string reason = 2;
+}
+
+message CheckCopyAvailabilityRequest {
+  string copy_id = 1;
+}
+
+message CheckCopyAvailabilityResponse {
+  bool available = 1;
+  string reason = 2;
+}
+
+message StartBorrowRequest {
+  string member_id = 1;
+  string copy_id = 2;
+  string due_at = 3;
+}
+
+message StartBorrowResponse {
+  BorrowRecord borrow_record = 1;
+}
+
+message MarkCopyOnLoanRequest {
+  string copy_id = 1;
+}
+
+message MarkCopyOnLoanResponse {
+  bool ok = 1;
+}
+
+message GetOpenBorrowByCopyRequest {
+  string copy_id = 1;
+}
+
+message ReturnBorrowRequest {
+  string borrow_record_id = 1;
+  string returned_at = 2;
+}
+
+message ReturnBorrowResponse {
+  BorrowRecord borrow_record = 1;
+}
+
+message MarkCopyAvailableRequest {
+  string copy_id = 1;
+}
+
+message MarkCopyAvailableResponse {
+  bool ok = 1;
+}
+
 service LibraryService {
   // Connectivity check for split-runtime health and tests.
   rpc Ping(Empty) returns (Pong);
+}
+
+service BookService {
+  rpc GetBook(GetBookRequest) returns (Book);
+  rpc ListBooks(ListBooksRequest) returns (ListBooksResponse);
+  rpc CreateBook(CreateBookRequest) returns (Book);
+  rpc UpdateBook(UpdateBookRequest) returns (Book);
+  rpc DeleteBook(DeleteBookRequest) returns (DeleteBookResponse);
+}
+
+service MemberService {
+  rpc GetMember(GetMemberRequest) returns (Member);
+  rpc ListMembers(ListMembersRequest) returns (ListMembersResponse);
+  rpc CreateMember(CreateMemberRequest) returns (Member);
+  rpc UpdateMember(UpdateMemberRequest) returns (Member);
+  rpc DeleteMember(DeleteMemberRequest) returns (DeleteMemberResponse);
+}
+
+service LendingService {
+  rpc CheckMemberEligibility(CheckMemberEligibilityRequest) returns (CheckMemberEligibilityResponse);
+  rpc CheckCopyAvailability(CheckCopyAvailabilityRequest) returns (CheckCopyAvailabilityResponse);
+  rpc StartBorrow(StartBorrowRequest) returns (StartBorrowResponse);
+  rpc MarkCopyOnLoan(MarkCopyOnLoanRequest) returns (MarkCopyOnLoanResponse);
+  rpc GetOpenBorrowByCopy(GetOpenBorrowByCopyRequest) returns (BorrowRecord);
+  rpc ReturnBorrow(ReturnBorrowRequest) returns (ReturnBorrowResponse);
+  rpc MarkCopyAvailable(MarkCopyAvailableRequest) returns (MarkCopyAvailableResponse);
 }

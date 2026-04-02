@@ -96,3 +96,821 @@ class LibraryService(object):
             timeout,
             metadata,
             _registered_method=True)
+
+
+class BookServiceStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.GetBook = channel.unary_unary(
+                '/library.v1.BookService/GetBook',
+                request_serializer=library_dot_v1_dot_library__pb2.GetBookRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.Book.FromString,
+                _registered_method=True)
+        self.ListBooks = channel.unary_unary(
+                '/library.v1.BookService/ListBooks',
+                request_serializer=library_dot_v1_dot_library__pb2.ListBooksRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.ListBooksResponse.FromString,
+                _registered_method=True)
+        self.CreateBook = channel.unary_unary(
+                '/library.v1.BookService/CreateBook',
+                request_serializer=library_dot_v1_dot_library__pb2.CreateBookRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.Book.FromString,
+                _registered_method=True)
+        self.UpdateBook = channel.unary_unary(
+                '/library.v1.BookService/UpdateBook',
+                request_serializer=library_dot_v1_dot_library__pb2.UpdateBookRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.Book.FromString,
+                _registered_method=True)
+        self.DeleteBook = channel.unary_unary(
+                '/library.v1.BookService/DeleteBook',
+                request_serializer=library_dot_v1_dot_library__pb2.DeleteBookRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.DeleteBookResponse.FromString,
+                _registered_method=True)
+
+
+class BookServiceServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def GetBook(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListBooks(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CreateBook(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdateBook(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DeleteBook(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_BookServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'GetBook': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetBook,
+                    request_deserializer=library_dot_v1_dot_library__pb2.GetBookRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.Book.SerializeToString,
+            ),
+            'ListBooks': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListBooks,
+                    request_deserializer=library_dot_v1_dot_library__pb2.ListBooksRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.ListBooksResponse.SerializeToString,
+            ),
+            'CreateBook': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateBook,
+                    request_deserializer=library_dot_v1_dot_library__pb2.CreateBookRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.Book.SerializeToString,
+            ),
+            'UpdateBook': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateBook,
+                    request_deserializer=library_dot_v1_dot_library__pb2.UpdateBookRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.Book.SerializeToString,
+            ),
+            'DeleteBook': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteBook,
+                    request_deserializer=library_dot_v1_dot_library__pb2.DeleteBookRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.DeleteBookResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'library.v1.BookService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('library.v1.BookService', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class BookService(object):
+    """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def GetBook(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.BookService/GetBook',
+            library_dot_v1_dot_library__pb2.GetBookRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.Book.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListBooks(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.BookService/ListBooks',
+            library_dot_v1_dot_library__pb2.ListBooksRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.ListBooksResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CreateBook(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.BookService/CreateBook',
+            library_dot_v1_dot_library__pb2.CreateBookRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.Book.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateBook(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.BookService/UpdateBook',
+            library_dot_v1_dot_library__pb2.UpdateBookRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.Book.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DeleteBook(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.BookService/DeleteBook',
+            library_dot_v1_dot_library__pb2.DeleteBookRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.DeleteBookResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+
+class MemberServiceStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.GetMember = channel.unary_unary(
+                '/library.v1.MemberService/GetMember',
+                request_serializer=library_dot_v1_dot_library__pb2.GetMemberRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.Member.FromString,
+                _registered_method=True)
+        self.ListMembers = channel.unary_unary(
+                '/library.v1.MemberService/ListMembers',
+                request_serializer=library_dot_v1_dot_library__pb2.ListMembersRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.ListMembersResponse.FromString,
+                _registered_method=True)
+        self.CreateMember = channel.unary_unary(
+                '/library.v1.MemberService/CreateMember',
+                request_serializer=library_dot_v1_dot_library__pb2.CreateMemberRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.Member.FromString,
+                _registered_method=True)
+        self.UpdateMember = channel.unary_unary(
+                '/library.v1.MemberService/UpdateMember',
+                request_serializer=library_dot_v1_dot_library__pb2.UpdateMemberRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.Member.FromString,
+                _registered_method=True)
+        self.DeleteMember = channel.unary_unary(
+                '/library.v1.MemberService/DeleteMember',
+                request_serializer=library_dot_v1_dot_library__pb2.DeleteMemberRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.DeleteMemberResponse.FromString,
+                _registered_method=True)
+
+
+class MemberServiceServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def GetMember(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListMembers(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CreateMember(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdateMember(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DeleteMember(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_MemberServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'GetMember': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetMember,
+                    request_deserializer=library_dot_v1_dot_library__pb2.GetMemberRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.Member.SerializeToString,
+            ),
+            'ListMembers': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListMembers,
+                    request_deserializer=library_dot_v1_dot_library__pb2.ListMembersRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.ListMembersResponse.SerializeToString,
+            ),
+            'CreateMember': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateMember,
+                    request_deserializer=library_dot_v1_dot_library__pb2.CreateMemberRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.Member.SerializeToString,
+            ),
+            'UpdateMember': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateMember,
+                    request_deserializer=library_dot_v1_dot_library__pb2.UpdateMemberRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.Member.SerializeToString,
+            ),
+            'DeleteMember': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteMember,
+                    request_deserializer=library_dot_v1_dot_library__pb2.DeleteMemberRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.DeleteMemberResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'library.v1.MemberService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('library.v1.MemberService', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class MemberService(object):
+    """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def GetMember(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.MemberService/GetMember',
+            library_dot_v1_dot_library__pb2.GetMemberRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.Member.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListMembers(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.MemberService/ListMembers',
+            library_dot_v1_dot_library__pb2.ListMembersRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.ListMembersResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CreateMember(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.MemberService/CreateMember',
+            library_dot_v1_dot_library__pb2.CreateMemberRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.Member.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UpdateMember(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.MemberService/UpdateMember',
+            library_dot_v1_dot_library__pb2.UpdateMemberRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.Member.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DeleteMember(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.MemberService/DeleteMember',
+            library_dot_v1_dot_library__pb2.DeleteMemberRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.DeleteMemberResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+
+class LendingServiceStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.CheckMemberEligibility = channel.unary_unary(
+                '/library.v1.LendingService/CheckMemberEligibility',
+                request_serializer=library_dot_v1_dot_library__pb2.CheckMemberEligibilityRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.CheckMemberEligibilityResponse.FromString,
+                _registered_method=True)
+        self.CheckCopyAvailability = channel.unary_unary(
+                '/library.v1.LendingService/CheckCopyAvailability',
+                request_serializer=library_dot_v1_dot_library__pb2.CheckCopyAvailabilityRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.CheckCopyAvailabilityResponse.FromString,
+                _registered_method=True)
+        self.StartBorrow = channel.unary_unary(
+                '/library.v1.LendingService/StartBorrow',
+                request_serializer=library_dot_v1_dot_library__pb2.StartBorrowRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.StartBorrowResponse.FromString,
+                _registered_method=True)
+        self.MarkCopyOnLoan = channel.unary_unary(
+                '/library.v1.LendingService/MarkCopyOnLoan',
+                request_serializer=library_dot_v1_dot_library__pb2.MarkCopyOnLoanRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.MarkCopyOnLoanResponse.FromString,
+                _registered_method=True)
+        self.GetOpenBorrowByCopy = channel.unary_unary(
+                '/library.v1.LendingService/GetOpenBorrowByCopy',
+                request_serializer=library_dot_v1_dot_library__pb2.GetOpenBorrowByCopyRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.BorrowRecord.FromString,
+                _registered_method=True)
+        self.ReturnBorrow = channel.unary_unary(
+                '/library.v1.LendingService/ReturnBorrow',
+                request_serializer=library_dot_v1_dot_library__pb2.ReturnBorrowRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.ReturnBorrowResponse.FromString,
+                _registered_method=True)
+        self.MarkCopyAvailable = channel.unary_unary(
+                '/library.v1.LendingService/MarkCopyAvailable',
+                request_serializer=library_dot_v1_dot_library__pb2.MarkCopyAvailableRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.MarkCopyAvailableResponse.FromString,
+                _registered_method=True)
+
+
+class LendingServiceServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def CheckMemberEligibility(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CheckCopyAvailability(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StartBorrow(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def MarkCopyOnLoan(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetOpenBorrowByCopy(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ReturnBorrow(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def MarkCopyAvailable(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_LendingServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'CheckMemberEligibility': grpc.unary_unary_rpc_method_handler(
+                    servicer.CheckMemberEligibility,
+                    request_deserializer=library_dot_v1_dot_library__pb2.CheckMemberEligibilityRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.CheckMemberEligibilityResponse.SerializeToString,
+            ),
+            'CheckCopyAvailability': grpc.unary_unary_rpc_method_handler(
+                    servicer.CheckCopyAvailability,
+                    request_deserializer=library_dot_v1_dot_library__pb2.CheckCopyAvailabilityRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.CheckCopyAvailabilityResponse.SerializeToString,
+            ),
+            'StartBorrow': grpc.unary_unary_rpc_method_handler(
+                    servicer.StartBorrow,
+                    request_deserializer=library_dot_v1_dot_library__pb2.StartBorrowRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.StartBorrowResponse.SerializeToString,
+            ),
+            'MarkCopyOnLoan': grpc.unary_unary_rpc_method_handler(
+                    servicer.MarkCopyOnLoan,
+                    request_deserializer=library_dot_v1_dot_library__pb2.MarkCopyOnLoanRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.MarkCopyOnLoanResponse.SerializeToString,
+            ),
+            'GetOpenBorrowByCopy': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetOpenBorrowByCopy,
+                    request_deserializer=library_dot_v1_dot_library__pb2.GetOpenBorrowByCopyRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.BorrowRecord.SerializeToString,
+            ),
+            'ReturnBorrow': grpc.unary_unary_rpc_method_handler(
+                    servicer.ReturnBorrow,
+                    request_deserializer=library_dot_v1_dot_library__pb2.ReturnBorrowRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.ReturnBorrowResponse.SerializeToString,
+            ),
+            'MarkCopyAvailable': grpc.unary_unary_rpc_method_handler(
+                    servicer.MarkCopyAvailable,
+                    request_deserializer=library_dot_v1_dot_library__pb2.MarkCopyAvailableRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.MarkCopyAvailableResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'library.v1.LendingService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('library.v1.LendingService', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class LendingService(object):
+    """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def CheckMemberEligibility(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.LendingService/CheckMemberEligibility',
+            library_dot_v1_dot_library__pb2.CheckMemberEligibilityRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.CheckMemberEligibilityResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CheckCopyAvailability(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.LendingService/CheckCopyAvailability',
+            library_dot_v1_dot_library__pb2.CheckCopyAvailabilityRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.CheckCopyAvailabilityResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StartBorrow(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.LendingService/StartBorrow',
+            library_dot_v1_dot_library__pb2.StartBorrowRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.StartBorrowResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def MarkCopyOnLoan(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.LendingService/MarkCopyOnLoan',
+            library_dot_v1_dot_library__pb2.MarkCopyOnLoanRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.MarkCopyOnLoanResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetOpenBorrowByCopy(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.LendingService/GetOpenBorrowByCopy',
+            library_dot_v1_dot_library__pb2.GetOpenBorrowByCopyRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.BorrowRecord.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ReturnBorrow(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.LendingService/ReturnBorrow',
+            library_dot_v1_dot_library__pb2.ReturnBorrowRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.ReturnBorrowResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def MarkCopyAvailable(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.LendingService/MarkCopyAvailable',
+            library_dot_v1_dot_library__pb2.MarkCopyAvailableRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.MarkCopyAvailableResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)

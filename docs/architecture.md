@@ -31,10 +31,12 @@ Documents are append-only and **explicitly keyed** for rollups and dashboards:
 
 **Matrices / clarity:** filter by `service` × `event` × time window to see process-flow health (e.g. gateway readiness vs gRPC reachability) and later RPC volume or error rates.
 
-## Interfaces (Day 1)
+## Interfaces (Day 3)
 
-- **REST:** `GET /health` — liveness. `GET /health/ready` — dependency matrix (gRPC ping, Postgres, optional Mongo).
-- **gRPC:** `library.v1.LibraryService/Ping` — internal connectivity. Standard **gRPC Health Checking Protocol** (`grpc.health.v1.Health`) is registered for ops probes.
+- **REST:** `GET /health` — liveness, `GET /health/ready` — dependency matrix, plus external book/member proxy routes:
+  `GET/POST/PUT /books` and `GET/POST/PUT /members`.
+- **gRPC:** internal-only services: `LibraryService/Ping` (connectivity), `BookService` + `MemberService` CRUD RPCs, and a chatty `LendingService` borrow/return workflow surface.
+  Standard **gRPC Health Checking Protocol** (`grpc.health.v1.Health`) is also registered for ops probes.
 
 ## Repository layout
 
