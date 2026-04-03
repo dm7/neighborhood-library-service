@@ -1,0 +1,97 @@
+Neighborhood Library — gRPC / Protobuf testing (Postman + grpcurl)
+===================================================================
+
+Proto source (import this in Postman for gRPC requests):
+  repo root: proto/library/v1/library.proto
+  package: library.v1
+  Server URL (insecure): localhost:50051  (or {{grpcHost}} from the Postman environment)
+
+Postman (v10+)
+--------------
+1. New → gRPC Request
+2. Enter server: localhost:50051 (no tls for local docker-compose)
+3. Import a .proto file → select proto/library/v1/library.proto
+4. Select service + method, then edit the message as JSON (field names = proto json names)
+
+Service → Method → Example JSON body
+------------------------------------
+LibraryService / Ping
+  {}
+
+BookService / GetBook
+  { "id": "11111111-1111-1111-1111-111111111101" }
+
+BookService / ListBooks
+  { "limit": 20, "offset": 0 }
+
+BookService / CreateBook
+  { "title": "Test", "author": "Tester", "isbn": "", "published_year": 2020 }
+
+BookService / UpdateBook
+  { "id": "11111111-1111-1111-1111-111111111101", "title": "...", "author": "...", "isbn": "", "published_year": 1969 }
+
+BookService / DeleteBook
+  { "id": "<uuid>" }
+
+MemberService / GetMember
+  { "id": "22222222-2222-2222-2222-222222222201" }
+
+MemberService / ListMembers
+  { "limit": 20, "offset": 0 }
+
+MemberService / CreateMember
+  { "full_name": "Name", "email": "unique@example.local", "phone": "" }
+
+MemberService / UpdateMember
+  { "id": "22222222-2222-2222-2222-222222222201", "full_name": "...", "email": "...", "phone": "" }
+
+MemberService / DeleteMember
+  { "id": "<uuid>" }
+
+LendingService / CheckMemberEligibility
+  { "member_id": "22222222-2222-2222-2222-222222222201" }
+
+LendingService / CheckCopyAvailability
+  { "copy_id": "33333333-3333-3333-3333-333333333303" }
+
+LendingService / StartBorrow
+  { "member_id": "22222222-2222-2222-2222-222222222201", "copy_id": "33333333-3333-3333-3333-333333333303", "due_at": "2026-12-31T23:59:59Z" }
+
+LendingService / MarkCopyOnLoan
+  { "copy_id": "33333333-3333-3333-3333-333333333303" }
+
+LendingService / GetOpenBorrowByCopy
+  { "copy_id": "33333333-3333-3333-3333-333333333301" }
+
+LendingService / ReturnBorrow
+  { "borrow_record_id": "44444444-4444-4444-4444-444444444401", "returned_at": "2026-04-02T12:00:00Z" }
+
+LendingService / MarkCopyAvailable
+  { "copy_id": "33333333-3333-3333-3333-333333333301" }
+
+grpcurl (optional CLI)
+-----------------------
+  grpcurl -plaintext -import-path proto -proto library/v1/library.proto \\
+    -d '{}' localhost:50051 library.v1.LibraryService/Ping
+
+  grpcurl -plaintext -import-path proto -proto library/v1/library.proto \\
+    -d '{"limit":5,"offset":0}' localhost:50051 library.v1.BookService/ListBooks
+
+Health (standard gRPC health)
+-----------------------------
+  Often registered as grpc.health.v1.Health/Check with service name "" — use Postman health tab or grpcurl with reflection if enabled (not enabled by default in this project).
+
+Pytest (automated)
+------------------
+  Unit tests (no stack required; mocks gRPC on REST):
+    cd rest_gateway && pytest tests/ -q
+
+    cd grpc_service && pytest tests/test_library_servicer.py -q
+
+  Live tests (docker compose up for postgres, mongo, grpc_service; optional rest_gateway):
+    export RUN_INTEGRATION=1
+    export GRPC_TARGET=localhost:50051
+    cd grpc_service && pytest tests/test_grpc_live_rpcs.py -v
+
+    export REST_BASE_URL=http://localhost:8080
+    cd rest_gateway && pytest tests/test_rest_live.py -v

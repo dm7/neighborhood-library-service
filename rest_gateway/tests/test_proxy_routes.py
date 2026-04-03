@@ -1,6 +1,11 @@
+from types import SimpleNamespace
+
+import grpc
 from fastapi.testclient import TestClient
 
 from neighborhood_library_gateway.app import app
+from neighborhood_library_gateway.app import _grpc_to_http
+from neighborhood_library_gateway.grpc_client import LendingPreconditionFailed
 
 
 class _Book:
@@ -30,6 +35,68 @@ def test_books_list_proxy(monkeypatch) -> None:
     body = resp.json()
     assert len(body) == 1
     assert body[0]["id"] == "b1"
+
+
+def test_api_borrow_chatty(monkeypatch) -> None:
+    rec = SimpleNamespace(
+        id="br1",
+        copy_id="c1",
+        member_id="m1",
+        borrowed_at="2026-01-01T00:00:00Z",
+        due_at="2026-02-01T00:00:00Z",
+        returned_at="",
+        notes="",
+    )
+    monkeypatch.setattr(
+        "neighborhood_library_gateway.app.borrow_book_chatty",
+        lambda member_id, copy_id, due_at: rec,
+    )
+    with TestClient(app) as client:
+        resp = client.post(
+            "/api/borrow",
+            json={
+                "member_id": "m1",
+                "copy_id": "c1",
+                "due_at": "2026-06-01T00:00:00+00:00",
+            },
+        )
+    assert resp.status_code == 201
+    body = resp.json()
+    assert body["id"] == "br1"
+    assert body["copy_id"] == "c1"
+
+
+def test_api_borrow_precondition_failed(monkeypatch) -> None:
+    def _reject(**_kwargs: object) -> None:
+        raise LendingPreconditionFailed("copy_not_available")
+
+    monkeypatch.setattr("neighborhood_library_gateway.app.borrow_book_chatty", _reject)
+    with TestClient(app) as client:
+        resp = client.post(
+            "/api/borrow",
+            json={
+                "member_id": "m1",
+                "copy_id": "c1",
+                "due_at": "2026-06-01T00:00:00+00:00",
+            },
+        )
+    assert resp.status_code == 400
+    assert resp.json()["detail"] == "copy_not_available"
+
+
+def test_grpc_to_http_maps_conflict_statuses() -> None:
+    class _Err(grpc.RpcError):
+        def __init__(self, status: grpc.StatusCode) -> None:
+            self._status = status
+
+        def code(self) -> grpc.StatusCode:
+            return self._status
+
+        def details(self) -> str:
+            return "x"
+
+    assert _grpc_to_http(_Err(grpc.StatusCode.ALREADY_EXISTS)).status_code == 409
+    assert _grpc_to_http(_Err(grpc.StatusCode.ABORTED)).status_code == 409
 
 
 def test_members_create_proxy(monkeypatch) -> None:

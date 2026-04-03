@@ -4,11 +4,21 @@ from __future__ import annotations
 
 import os
 from collections.abc import Sequence
+from datetime import datetime
+from datetime import timezone
 
 import grpc
 
 from library.v1 import library_pb2
 from library.v1 import library_pb2_grpc
+
+
+class LendingPreconditionFailed(Exception):
+    """Check* RPC reported failure (not a transport error)."""
+
+    def __init__(self, reason: str) -> None:
+        self.reason = reason
+        super().__init__(reason)
 
 
 def ping_internal() -> tuple[bool, str]:
@@ -81,6 +91,57 @@ def update_member(member_id: str, full_name: str, email: str, phone: str) -> lib
             library_pb2.UpdateMemberRequest(id=member_id, full_name=full_name, email=email, phone=phone),
             timeout=5.0,
         )
+
+
+def borrow_book_chatty(member_id: str, copy_id: str, due_at: str) -> library_pb2.BorrowRecord:
+    """
+    Chatty orchestration: eligibility → availability → StartBorrow (transactional) → MarkCopyOnLoan (idempotent).
+    """
+    with _channel() as channel:
+        lending = library_pb2_grpc.LendingServiceStub(channel)
+        elig = lending.CheckMemberEligibility(
+            library_pb2.CheckMemberEligibilityRequest(member_id=member_id),
+            timeout=10.0,
+        )
+        if not elig.eligible:
+            raise LendingPreconditionFailed(elig.reason or "member_not_eligible")
+        avail = lending.CheckCopyAvailability(
+            library_pb2.CheckCopyAvailabilityRequest(copy_id=copy_id),
+            timeout=10.0,
+        )
+        if not avail.available:
+            raise LendingPreconditionFailed(avail.reason or "copy_not_available")
+        started = lending.StartBorrow(
+            library_pb2.StartBorrowRequest(member_id=member_id, copy_id=copy_id, due_at=due_at),
+            timeout=10.0,
+        )
+        lending.MarkCopyOnLoan(
+            library_pb2.MarkCopyOnLoanRequest(copy_id=copy_id),
+            timeout=10.0,
+        )
+        return started.borrow_record
+
+
+def return_copy_chatty(copy_id: str, returned_at: str | None = None) -> library_pb2.BorrowRecord:
+    """
+    Chatty orchestration: resolve open borrow → ReturnBorrow (transactional) → MarkCopyAvailable (idempotent).
+    """
+    ts = returned_at or datetime.now(timezone.utc).isoformat()
+    with _channel() as channel:
+        lending = library_pb2_grpc.LendingServiceStub(channel)
+        open_rec = lending.GetOpenBorrowByCopy(
+            library_pb2.GetOpenBorrowByCopyRequest(copy_id=copy_id),
+            timeout=10.0,
+        )
+        closed = lending.ReturnBorrow(
+            library_pb2.ReturnBorrowRequest(borrow_record_id=open_rec.id, returned_at=ts),
+            timeout=10.0,
+        )
+        lending.MarkCopyAvailable(
+            library_pb2.MarkCopyAvailableRequest(copy_id=copy_id),
+            timeout=10.0,
+        )
+        return closed.borrow_record
 
 
 def _channel() -> grpc.Channel:

@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import os
 from contextlib import asynccontextmanager
+from typing import Any
 
 import grpc
 import psycopg
@@ -13,11 +14,14 @@ from fastapi import HTTPException
 from pydantic import BaseModel
 from pymongo.errors import PyMongoError
 
+from neighborhood_library_gateway.grpc_client import borrow_book_chatty
 from neighborhood_library_gateway.grpc_client import create_book
 from neighborhood_library_gateway.grpc_client import create_member
+from neighborhood_library_gateway.grpc_client import LendingPreconditionFailed
 from neighborhood_library_gateway.grpc_client import list_books
 from neighborhood_library_gateway.grpc_client import list_members
 from neighborhood_library_gateway.grpc_client import ping_internal
+from neighborhood_library_gateway.grpc_client import return_copy_chatty
 from neighborhood_library_gateway.grpc_client import update_book
 from neighborhood_library_gateway.grpc_client import update_member
 from neighborhood_library_gateway.mongo_events import log_service_event
@@ -50,6 +54,17 @@ class MemberWrite(BaseModel):
     full_name: str
     email: str
     phone: str = ""
+
+
+class BorrowRequest(BaseModel):
+    member_id: str
+    copy_id: str
+    due_at: str
+
+
+class ReturnByCopyRequest(BaseModel):
+    copy_id: str
+    returned_at: str = ""
 
 
 @app.get("/health")
@@ -150,6 +165,33 @@ def members_update(member_id: str, payload: MemberWrite) -> dict[str, object]:
         raise _grpc_to_http(exc) from exc
 
 
+@app.post("/api/borrow", status_code=201)
+def api_borrow(payload: BorrowRequest) -> dict[str, object]:
+    """Coarse REST borrow: internally runs several LendingService RPCs in order."""
+    try:
+        record = borrow_book_chatty(
+            member_id=payload.member_id,
+            copy_id=payload.copy_id,
+            due_at=payload.due_at,
+        )
+        return _borrow_record_to_dict(record)
+    except LendingPreconditionFailed as exc:
+        raise HTTPException(status_code=400, detail=exc.reason) from exc
+    except grpc.RpcError as exc:
+        raise _grpc_to_http(exc) from exc
+
+
+@app.post("/api/return")
+def api_return(payload: ReturnByCopyRequest) -> dict[str, object]:
+    """Coarse REST return by copy: GetOpenBorrowByCopy → ReturnBorrow → MarkCopyAvailable."""
+    try:
+        ts = payload.returned_at.strip() or None
+        record = return_copy_chatty(copy_id=payload.copy_id, returned_at=ts)
+        return _borrow_record_to_dict(record)
+    except grpc.RpcError as exc:
+        raise _grpc_to_http(exc) from exc
+
+
 def _postgres_domain_ready() -> bool:
     """True when Postgres accepts connections and core library tables exist."""
     dsn = os.environ.get("POSTGRES_DSN", "").strip()
@@ -210,11 +252,27 @@ def _member_to_dict(member) -> dict[str, object]:
     }
 
 
+def _borrow_record_to_dict(record: Any) -> dict[str, object]:
+    return {
+        "id": record.id,
+        "copy_id": record.copy_id,
+        "member_id": record.member_id,
+        "borrowed_at": record.borrowed_at,
+        "due_at": record.due_at,
+        "returned_at": record.returned_at,
+        "notes": record.notes,
+    }
+
+
 def _grpc_to_http(exc: grpc.RpcError) -> HTTPException:
     code = exc.code()
     detail = exc.details() if hasattr(exc, "details") else str(exc)
     if code == grpc.StatusCode.NOT_FOUND:
         return HTTPException(status_code=404, detail=detail)
+    if code == grpc.StatusCode.ALREADY_EXISTS:
+        return HTTPException(status_code=409, detail=detail)
+    if code == grpc.StatusCode.ABORTED:
+        return HTTPException(status_code=409, detail=detail)
     if code == grpc.StatusCode.FAILED_PRECONDITION:
         return HTTPException(status_code=412, detail=detail)
     if code == grpc.StatusCode.INVALID_ARGUMENT:
