@@ -5,7 +5,7 @@ import warnings
 
 from library.v1 import library_pb2 as library_dot_v1_dot_library__pb2
 
-GRPC_GENERATED_VERSION = '1.78.0'
+GRPC_GENERATED_VERSION = '1.80.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -630,6 +630,16 @@ class LendingServiceStub(object):
                 request_serializer=library_dot_v1_dot_library__pb2.MarkCopyAvailableRequest.SerializeToString,
                 response_deserializer=library_dot_v1_dot_library__pb2.MarkCopyAvailableResponse.FromString,
                 _registered_method=True)
+        self.ListBorrowedByMember = channel.unary_unary(
+                '/library.v1.LendingService/ListBorrowedByMember',
+                request_serializer=library_dot_v1_dot_library__pb2.ListBorrowedByMemberRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.ListBorrowedByMemberResponse.FromString,
+                _registered_method=True)
+        self.ListActiveLoans = channel.unary_unary(
+                '/library.v1.LendingService/ListActiveLoans',
+                request_serializer=library_dot_v1_dot_library__pb2.ListActiveLoansRequest.SerializeToString,
+                response_deserializer=library_dot_v1_dot_library__pb2.ListActiveLoansResponse.FromString,
+                _registered_method=True)
 
 
 class LendingServiceServicer(object):
@@ -677,6 +687,18 @@ class LendingServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ListBorrowedByMember(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListActiveLoans(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_LendingServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -714,6 +736,16 @@ def add_LendingServiceServicer_to_server(servicer, server):
                     servicer.MarkCopyAvailable,
                     request_deserializer=library_dot_v1_dot_library__pb2.MarkCopyAvailableRequest.FromString,
                     response_serializer=library_dot_v1_dot_library__pb2.MarkCopyAvailableResponse.SerializeToString,
+            ),
+            'ListBorrowedByMember': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListBorrowedByMember,
+                    request_deserializer=library_dot_v1_dot_library__pb2.ListBorrowedByMemberRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.ListBorrowedByMemberResponse.SerializeToString,
+            ),
+            'ListActiveLoans': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListActiveLoans,
+                    request_deserializer=library_dot_v1_dot_library__pb2.ListActiveLoansRequest.FromString,
+                    response_serializer=library_dot_v1_dot_library__pb2.ListActiveLoansResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -905,6 +937,60 @@ class LendingService(object):
             '/library.v1.LendingService/MarkCopyAvailable',
             library_dot_v1_dot_library__pb2.MarkCopyAvailableRequest.SerializeToString,
             library_dot_v1_dot_library__pb2.MarkCopyAvailableResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListBorrowedByMember(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.LendingService/ListBorrowedByMember',
+            library_dot_v1_dot_library__pb2.ListBorrowedByMemberRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.ListBorrowedByMemberResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListActiveLoans(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/library.v1.LendingService/ListActiveLoans',
+            library_dot_v1_dot_library__pb2.ListActiveLoansRequest.SerializeToString,
+            library_dot_v1_dot_library__pb2.ListActiveLoansResponse.FromString,
             options,
             channel_credentials,
             insecure,

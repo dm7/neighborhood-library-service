@@ -122,6 +122,16 @@ def borrow_book_chatty(member_id: str, copy_id: str, due_at: str) -> library_pb2
         return started.borrow_record
 
 
+def list_borrowed_by_member(member_id: str) -> Sequence[library_pb2.LoanDetail]:
+    with _channel() as channel:
+        stub = library_pb2_grpc.LendingServiceStub(channel)
+        resp = stub.ListBorrowedByMember(
+            library_pb2.ListBorrowedByMemberRequest(member_id=member_id),
+            timeout=10.0,
+        )
+    return resp.loans
+
+
 def return_copy_chatty(copy_id: str, returned_at: str | None = None) -> library_pb2.BorrowRecord:
     """
     Chatty orchestration: resolve open borrow → ReturnBorrow (transactional) → MarkCopyAvailable (idempotent).

@@ -25,3 +25,5 @@ def test_generated_stubs_include_day3_services() -> None:
     assert callable(book_stub.ListBooks)
     assert callable(member_stub.ListMembers)
     assert callable(lending_stub.CheckCopyAvailability)
+    assert callable(lending_stub.ListBorrowedByMember)
+    assert callable(lending_stub.ListActiveLoans)

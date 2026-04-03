@@ -19,6 +19,7 @@ from neighborhood_library_gateway.grpc_client import create_book
 from neighborhood_library_gateway.grpc_client import create_member
 from neighborhood_library_gateway.grpc_client import LendingPreconditionFailed
 from neighborhood_library_gateway.grpc_client import list_books
+from neighborhood_library_gateway.grpc_client import list_borrowed_by_member
 from neighborhood_library_gateway.grpc_client import list_members
 from neighborhood_library_gateway.grpc_client import ping_internal
 from neighborhood_library_gateway.grpc_client import return_copy_chatty
@@ -181,6 +182,16 @@ def api_borrow(payload: BorrowRequest) -> dict[str, object]:
         raise _grpc_to_http(exc) from exc
 
 
+@app.get("/api/members/{member_id}/borrowed")
+def api_members_borrowed(member_id: str) -> list[dict[str, object]]:
+    """Currently checked-out books for a member (gRPC ListBorrowedByMember)."""
+    try:
+        loans = list_borrowed_by_member(member_id=member_id)
+        return [_loan_detail_to_dict(loan) for loan in loans]
+    except grpc.RpcError as exc:
+        raise _grpc_to_http(exc) from exc
+
+
 @app.post("/api/return")
 def api_return(payload: ReturnByCopyRequest) -> dict[str, object]:
     """Coarse REST return by copy: GetOpenBorrowByCopy → ReturnBorrow → MarkCopyAvailable."""
@@ -261,6 +272,15 @@ def _borrow_record_to_dict(record: Any) -> dict[str, object]:
         "due_at": record.due_at,
         "returned_at": record.returned_at,
         "notes": record.notes,
+    }
+
+
+def _loan_detail_to_dict(loan: Any) -> dict[str, object]:
+    return {
+        "borrow_record": _borrow_record_to_dict(loan.borrow_record),
+        "book": _book_to_dict(loan.book),
+        "member": _member_to_dict(loan.member),
+        "copy_barcode": loan.copy_barcode,
     }
 
 

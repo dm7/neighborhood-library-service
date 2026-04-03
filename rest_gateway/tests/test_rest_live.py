@@ -55,3 +55,55 @@ def test_live_get_members(rest_client: httpx.Client) -> None:
     assert r.status_code == 200
     data = r.json()
     assert isinstance(data, list)
+
+
+# Seed member Ada from db/migrations/002_seed.sql
+SEED_MEMBER = "22222222-2222-2222-2222-222222222201"
+SEED_COPY_ROUNDTRIP = "33333333-3333-3333-3333-333333333304"
+
+
+def test_live_get_member_borrowed(rest_client: httpx.Client) -> None:
+    r = rest_client.get(f"/api/members/{SEED_MEMBER}/borrowed")
+    assert r.status_code == 200
+    data = r.json()
+    assert isinstance(data, list)
+    assert len(data) >= 1
+    row = data[0]
+    assert "borrow_record" in row
+    assert "book" in row
+    assert "member" in row
+    assert row["borrow_record"]["member_id"] == SEED_MEMBER
+    assert row["book"]["title"]
+    assert row["copy_barcode"]
+
+
+def test_live_get_member_borrowed_unknown_member(rest_client: httpx.Client) -> None:
+    r = rest_client.get("/api/members/00000000-0000-0000-0000-000000000099/borrowed")
+    assert r.status_code == 404
+
+
+def test_live_rest_borrow_list_borrowed_return_sequence(rest_client: httpx.Client) -> None:
+    """Coarse REST borrow → GET borrowed → return; verifies gateway delegates queries to gRPC."""
+    borrow = rest_client.post(
+        "/api/borrow",
+        json={
+            "member_id": SEED_MEMBER,
+            "copy_id": SEED_COPY_ROUNDTRIP,
+            "due_at": "2027-08-15T12:00:00+00:00",
+        },
+    )
+    if borrow.status_code != 201:
+        pytest.skip(f"borrow failed (copy may be on loan): {borrow.status_code} {borrow.text}")
+
+    listed = rest_client.get(f"/api/members/{SEED_MEMBER}/borrowed")
+    assert listed.status_code == 200
+    copies = {item["borrow_record"]["copy_id"] for item in listed.json()}
+    assert SEED_COPY_ROUNDTRIP in copies
+
+    ret = rest_client.post("/api/return", json={"copy_id": SEED_COPY_ROUNDTRIP, "returned_at": ""})
+    assert ret.status_code == 200
+
+    listed2 = rest_client.get(f"/api/members/{SEED_MEMBER}/borrowed")
+    assert listed2.status_code == 200
+    copies2 = {item["borrow_record"]["copy_id"] for item in listed2.json()}
+    assert SEED_COPY_ROUNDTRIP not in copies2

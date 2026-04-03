@@ -165,6 +165,83 @@ def test_lending_get_open_borrow_not_found(grpc_integration_channel: grpc.Channe
     assert excinfo.value.code() == grpc.StatusCode.NOT_FOUND
 
 
+def test_lending_list_borrowed_by_member(grpc_integration_channel: grpc.Channel) -> None:
+    stub = library_pb2_grpc.LendingServiceStub(grpc_integration_channel)
+    resp = stub.ListBorrowedByMember(
+        library_pb2.ListBorrowedByMemberRequest(member_id=SEED_MEMBER),
+        timeout=10,
+    )
+    assert len(resp.loans) >= 1
+    first = resp.loans[0]
+    assert first.borrow_record.member_id == SEED_MEMBER
+    assert first.borrow_record.returned_at == ""
+    assert first.book.title
+    assert first.member.email
+    assert first.copy_barcode
+
+
+def test_lending_list_borrowed_by_member_not_found(grpc_integration_channel: grpc.Channel) -> None:
+    stub = library_pb2_grpc.LendingServiceStub(grpc_integration_channel)
+    with pytest.raises(grpc.RpcError) as excinfo:
+        stub.ListBorrowedByMember(
+            library_pb2.ListBorrowedByMemberRequest(member_id=MISSING_UUID),
+            timeout=10,
+        )
+    assert excinfo.value.code() == grpc.StatusCode.NOT_FOUND
+
+
+def test_lending_list_active_loans(grpc_integration_channel: grpc.Channel) -> None:
+    stub = library_pb2_grpc.LendingServiceStub(grpc_integration_channel)
+    resp = stub.ListActiveLoans(library_pb2.ListActiveLoansRequest(limit=50, offset=0), timeout=10)
+    assert len(resp.loans) >= 1
+    copy_ids = {loan.borrow_record.copy_id for loan in resp.loans}
+    assert SEED_COPY_ON_LOAN in copy_ids
+
+
+def test_lending_chatty_borrow_then_list_borrowed_then_return(grpc_integration_channel: grpc.Channel) -> None:
+    """Borrow via chatty RPCs, confirm ListBorrowedByMember, then return and confirm list is empty for that copy."""
+    stub = library_pb2_grpc.LendingServiceStub(grpc_integration_channel)
+    copy_id = SEED_COPY_ROUNDTRIP
+    avail = stub.CheckCopyAvailability(
+        library_pb2.CheckCopyAvailabilityRequest(copy_id=copy_id),
+        timeout=10,
+    )
+    if not avail.available:
+        pytest.skip("seed copy 304 is not available (database may be dirty from a previous run)")
+
+    due = "2027-07-01T12:00:00+00:00"
+    stub.StartBorrow(
+        library_pb2.StartBorrowRequest(member_id=SEED_MEMBER, copy_id=copy_id, due_at=due),
+        timeout=10,
+    )
+    stub.MarkCopyOnLoan(library_pb2.MarkCopyOnLoanRequest(copy_id=copy_id), timeout=10)
+
+    listed = stub.ListBorrowedByMember(
+        library_pb2.ListBorrowedByMemberRequest(member_id=SEED_MEMBER),
+        timeout=10,
+    )
+    ours = [ln for ln in listed.loans if ln.borrow_record.copy_id == copy_id]
+    assert len(ours) == 1
+    assert ours[0].book.title
+
+    open_rec = stub.GetOpenBorrowByCopy(
+        library_pb2.GetOpenBorrowByCopyRequest(copy_id=copy_id),
+        timeout=10,
+    )
+    returned_at = datetime.now(timezone.utc).isoformat()
+    stub.ReturnBorrow(
+        library_pb2.ReturnBorrowRequest(borrow_record_id=open_rec.id, returned_at=returned_at),
+        timeout=10,
+    )
+    stub.MarkCopyAvailable(library_pb2.MarkCopyAvailableRequest(copy_id=copy_id), timeout=10)
+
+    listed_after = stub.ListBorrowedByMember(
+        library_pb2.ListBorrowedByMemberRequest(member_id=SEED_MEMBER),
+        timeout=10,
+    )
+    assert all(ln.borrow_record.copy_id != copy_id for ln in listed_after.loans)
+
+
 def test_lending_borrow_mark_return_mark_roundtrip(grpc_integration_channel: grpc.Channel) -> None:
     """Uses seed copy 304 (available); restores shelf state after."""
     stub = library_pb2_grpc.LendingServiceStub(grpc_integration_channel)
