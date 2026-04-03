@@ -11,6 +11,7 @@ dependencies = [
   "fastapi>=0.109",
   "uvicorn[standard]>=0.27",
   "grpcio>=1.78",
+  "protobuf>=4.25",
   "pymongo>=4.6",
   "psycopg[binary]>=3.1",
   "python-dotenv>=1.0",
@@ -25,3 +26,6 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+  "integration: exercises live REST_BASE_URL (set RUN_INTEGRATION=1)",
+]

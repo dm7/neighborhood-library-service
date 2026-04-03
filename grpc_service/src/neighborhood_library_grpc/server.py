@@ -9,6 +9,7 @@ from typing import Any
 
 import grpc
 import psycopg
+from psycopg import errors as pg_errors
 from grpc_health.v1 import health
 from grpc_health.v1 import health_pb2
 from grpc_health.v1 import health_pb2_grpc
@@ -16,6 +17,11 @@ from grpc_health.v1 import health_pb2_grpc
 from library.v1 import library_pb2
 from library.v1 import library_pb2_grpc
 
+from neighborhood_library_grpc.lending_workflow import LendingWorkflowError
+from neighborhood_library_grpc.lending_workflow import complete_return_workflow
+from neighborhood_library_grpc.lending_workflow import mark_copy_available_idempotent
+from neighborhood_library_grpc.lending_workflow import mark_copy_on_loan_idempotent
+from neighborhood_library_grpc.lending_workflow import start_borrow_workflow
 from neighborhood_library_grpc.mongo_events import log_service_event
 
 _LOG = logging.getLogger(__name__)
@@ -225,32 +231,43 @@ class LendingServicer(library_pb2_grpc.LendingServiceServicer):
     def StartBorrow(
         self, request: library_pb2.StartBorrowRequest, context: grpc.ServicerContext
     ) -> library_pb2.StartBorrowResponse:
-        with _connect_postgres_or_abort(context) as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    INSERT INTO borrow_records (copy_id, member_id, due_at)
-                    VALUES (%s, %s, %s::timestamptz)
-                    RETURNING id::text, copy_id::text, member_id::text, borrowed_at::text, due_at::text,
-                              COALESCE(returned_at::text, ''), COALESCE(notes, '')
-                    """,
-                    (request.copy_id, request.member_id, request.due_at),
-                )
-                row = cur.fetchone()
-            conn.commit()
-        if row is None:
-            context.abort(grpc.StatusCode.INTERNAL, "failed to start borrow")
+        if not request.member_id or not request.copy_id or not request.due_at:
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT,
+                "member_id, copy_id, and due_at are required",
+            )
+        try:
+            with _connect_postgres_or_abort(context) as conn:
+                with conn.transaction():
+                    row = start_borrow_workflow(
+                        conn,
+                        request.member_id,
+                        request.copy_id,
+                        request.due_at,
+                    )
+        except LendingWorkflowError as exc:
+            context.abort(exc.code, exc.message)
+        except pg_errors.UniqueViolation:
+            context.abort(
+                grpc.StatusCode.ALREADY_EXISTS,
+                "an open borrow already exists for this copy",
+            )
+        except pg_errors.DataError as exc:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, str(exc))
         return library_pb2.StartBorrowResponse(borrow_record=_borrow_record_from_row(row))
 
     def MarkCopyOnLoan(
         self, request: library_pb2.MarkCopyOnLoanRequest, context: grpc.ServicerContext
     ) -> library_pb2.MarkCopyOnLoanResponse:
-        with _connect_postgres_or_abort(context) as conn:
-            with conn.cursor() as cur:
-                cur.execute("UPDATE book_copies SET status = 'on_loan' WHERE id = %s", (request.copy_id,))
-                updated = cur.rowcount > 0
-            conn.commit()
-        return library_pb2.MarkCopyOnLoanResponse(ok=updated)
+        if not request.copy_id:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "copy_id is required")
+        try:
+            with _connect_postgres_or_abort(context) as conn:
+                with conn.transaction():
+                    mark_copy_on_loan_idempotent(conn, request.copy_id)
+        except LendingWorkflowError as exc:
+            context.abort(exc.code, exc.message)
+        return library_pb2.MarkCopyOnLoanResponse(ok=True)
 
     def GetOpenBorrowByCopy(
         self, request: library_pb2.GetOpenBorrowByCopyRequest, context: grpc.ServicerContext
@@ -276,33 +293,37 @@ class LendingServicer(library_pb2_grpc.LendingServiceServicer):
     def ReturnBorrow(
         self, request: library_pb2.ReturnBorrowRequest, context: grpc.ServicerContext
     ) -> library_pb2.ReturnBorrowResponse:
-        with _connect_postgres_or_abort(context) as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    UPDATE borrow_records
-                    SET returned_at = %s::timestamptz
-                    WHERE id = %s
-                    RETURNING id::text, copy_id::text, member_id::text, borrowed_at::text, due_at::text,
-                              COALESCE(returned_at::text, ''), COALESCE(notes, '')
-                    """,
-                    (request.returned_at, request.borrow_record_id),
-                )
-                row = cur.fetchone()
-            conn.commit()
-        if row is None:
-            context.abort(grpc.StatusCode.NOT_FOUND, f"borrow record not found: {request.borrow_record_id}")
+        if not request.borrow_record_id or not request.returned_at:
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT,
+                "borrow_record_id and returned_at are required",
+            )
+        try:
+            with _connect_postgres_or_abort(context) as conn:
+                with conn.transaction():
+                    row = complete_return_workflow(
+                        conn,
+                        request.borrow_record_id,
+                        request.returned_at,
+                    )
+        except LendingWorkflowError as exc:
+            context.abort(exc.code, exc.message)
+        except pg_errors.DataError as exc:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, str(exc))
         return library_pb2.ReturnBorrowResponse(borrow_record=_borrow_record_from_row(row))
 
     def MarkCopyAvailable(
         self, request: library_pb2.MarkCopyAvailableRequest, context: grpc.ServicerContext
     ) -> library_pb2.MarkCopyAvailableResponse:
-        with _connect_postgres_or_abort(context) as conn:
-            with conn.cursor() as cur:
-                cur.execute("UPDATE book_copies SET status = 'available' WHERE id = %s", (request.copy_id,))
-                updated = cur.rowcount > 0
-            conn.commit()
-        return library_pb2.MarkCopyAvailableResponse(ok=updated)
+        if not request.copy_id:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "copy_id is required")
+        try:
+            with _connect_postgres_or_abort(context) as conn:
+                with conn.transaction():
+                    mark_copy_available_idempotent(conn, request.copy_id)
+        except LendingWorkflowError as exc:
+            context.abort(exc.code, exc.message)
+        return library_pb2.MarkCopyAvailableResponse(ok=True)
 
 
 def _connect_postgres_or_abort(context: grpc.ServicerContext) -> psycopg.Connection[Any]:
