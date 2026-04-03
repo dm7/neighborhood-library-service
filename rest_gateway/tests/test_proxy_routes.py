@@ -3,6 +3,8 @@ from types import SimpleNamespace
 import grpc
 from fastapi.testclient import TestClient
 
+from library.v1 import library_pb2
+
 from neighborhood_library_gateway.app import app
 from neighborhood_library_gateway.app import _grpc_to_http
 from neighborhood_library_gateway.grpc_client import LendingPreconditionFailed
@@ -35,6 +37,48 @@ def test_books_list_proxy(monkeypatch) -> None:
     body = resp.json()
     assert len(body) == 1
     assert body[0]["id"] == "b1"
+
+
+def test_api_members_borrowed_proxy(monkeypatch) -> None:
+    loan = library_pb2.LoanDetail(
+        borrow_record=library_pb2.BorrowRecord(
+            id="br1",
+            copy_id="c1",
+            member_id="m1",
+            borrowed_at="2026-01-01T00:00:00Z",
+            due_at="2026-02-01T00:00:00Z",
+            returned_at="",
+            notes="",
+        ),
+        book=library_pb2.Book(
+            id="b1",
+            title="Test Title",
+            author="Author",
+            isbn="",
+            published_year=2000,
+            created_at="2026-01-01T00:00:00Z",
+        ),
+        member=library_pb2.Member(
+            id="m1",
+            full_name="Ada",
+            email="ada@example.local",
+            phone="",
+            created_at="2026-01-01T00:00:00Z",
+        ),
+        copy_barcode="BAR-1",
+    )
+    monkeypatch.setattr(
+        "neighborhood_library_gateway.app.list_borrowed_by_member",
+        lambda member_id: [loan],
+    )
+    with TestClient(app) as client:
+        resp = client.get("/api/members/m1/borrowed")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert len(body) == 1
+    assert body[0]["copy_barcode"] == "BAR-1"
+    assert body[0]["book"]["title"] == "Test Title"
+    assert body[0]["borrow_record"]["id"] == "br1"
 
 
 def test_api_borrow_chatty(monkeypatch) -> None:

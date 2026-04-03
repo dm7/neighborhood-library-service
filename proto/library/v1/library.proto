@@ -172,6 +172,31 @@ message MarkCopyAvailableResponse {
   bool ok = 1;
 }
 
+// Open-loan row: borrow record plus catalog context (for queries).
+message LoanDetail {
+  BorrowRecord borrow_record = 1;
+  Book book = 2;
+  Member member = 3;
+  string copy_barcode = 4;
+}
+
+message ListBorrowedByMemberRequest {
+  string member_id = 1;
+}
+
+message ListBorrowedByMemberResponse {
+  repeated LoanDetail loans = 1;
+}
+
+message ListActiveLoansRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
+message ListActiveLoansResponse {
+  repeated LoanDetail loans = 1;
+}
+
 service LibraryService {
   // Connectivity check for split-runtime health and tests.
   rpc Ping(Empty) returns (Pong);
@@ -201,4 +226,6 @@ service LendingService {
   rpc GetOpenBorrowByCopy(GetOpenBorrowByCopyRequest) returns (BorrowRecord);
   rpc ReturnBorrow(ReturnBorrowRequest) returns (ReturnBorrowResponse);
   rpc MarkCopyAvailable(MarkCopyAvailableRequest) returns (MarkCopyAvailableResponse);
+  rpc ListBorrowedByMember(ListBorrowedByMemberRequest) returns (ListBorrowedByMemberResponse);
+  rpc ListActiveLoans(ListActiveLoansRequest) returns (ListActiveLoansResponse);
 }

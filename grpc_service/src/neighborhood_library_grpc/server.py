@@ -325,6 +325,52 @@ class LendingServicer(library_pb2_grpc.LendingServiceServicer):
             context.abort(exc.code, exc.message)
         return library_pb2.MarkCopyAvailableResponse(ok=True)
 
+    def ListBorrowedByMember(
+        self, request: library_pb2.ListBorrowedByMemberRequest, context: grpc.ServicerContext
+    ) -> library_pb2.ListBorrowedByMemberResponse:
+        if not request.member_id:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "member_id is required")
+        with _connect_postgres_or_abort(context) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1 FROM members WHERE id = %s", (request.member_id,))
+                if cur.fetchone() is None:
+                    context.abort(grpc.StatusCode.NOT_FOUND, f"member not found: {request.member_id}")
+                cur.execute(
+                    _OPEN_LOAN_DETAIL_QUERY + " AND br.member_id = %s ORDER BY br.borrowed_at DESC",
+                    (request.member_id,),
+                )
+                rows = cur.fetchall()
+        return library_pb2.ListBorrowedByMemberResponse(loans=[_loan_detail_from_row(r) for r in rows])
+
+    def ListActiveLoans(
+        self, request: library_pb2.ListActiveLoansRequest, context: grpc.ServicerContext
+    ) -> library_pb2.ListActiveLoansResponse:
+        limit = max(1, min(request.limit or 100, 500))
+        offset = max(request.offset or 0, 0)
+        with _connect_postgres_or_abort(context) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    _OPEN_LOAN_DETAIL_QUERY + " ORDER BY br.borrowed_at DESC LIMIT %s OFFSET %s",
+                    (limit, offset),
+                )
+                rows = cur.fetchall()
+        return library_pb2.ListActiveLoansResponse(loans=[_loan_detail_from_row(r) for r in rows])
+
+
+_OPEN_LOAN_DETAIL_QUERY = """
+SELECT
+  br.id::text, br.copy_id::text, br.member_id::text, br.borrowed_at::text, br.due_at::text,
+  COALESCE(br.returned_at::text, ''), COALESCE(br.notes, ''),
+  b.id::text, b.title, b.author, COALESCE(b.isbn, ''), COALESCE(b.published_year, 0), b.created_at::text,
+  m.id::text, m.full_name, m.email, COALESCE(m.phone, ''), m.created_at::text,
+  COALESCE(bc.barcode, '')
+FROM borrow_records br
+JOIN book_copies bc ON bc.id = br.copy_id
+JOIN books b ON b.id = bc.book_id
+JOIN members m ON m.id = br.member_id
+WHERE br.returned_at IS NULL
+"""
+
 
 def _connect_postgres_or_abort(context: grpc.ServicerContext) -> psycopg.Connection[Any]:
     dsn = os.environ.get("POSTGRES_DSN", "").strip()
@@ -367,6 +413,15 @@ def _borrow_record_from_row(row: Any) -> library_pb2.BorrowRecord:
         due_at=row[4],
         returned_at=row[5],
         notes=row[6],
+    )
+
+
+def _loan_detail_from_row(row: Any) -> library_pb2.LoanDetail:
+    return library_pb2.LoanDetail(
+        borrow_record=_borrow_record_from_row(row[0:7]),
+        book=_book_from_row(row[7:13]),
+        member=_member_from_row(row[13:18]),
+        copy_barcode=row[18],
     )
 
 

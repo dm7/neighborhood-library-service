@@ -69,6 +69,12 @@ LendingService / ReturnBorrow
 LendingService / MarkCopyAvailable
   { "copy_id": "33333333-3333-3333-3333-333333333301" }
 
+LendingService / ListBorrowedByMember
+  { "member_id": "22222222-2222-2222-2222-222222222201" }
+
+LendingService / ListActiveLoans
+  { "limit": 20, "offset": 0 }
+
 grpcurl (optional CLI)
 -----------------------
   grpcurl -plaintext -import-path proto -proto library/v1/library.proto \\
