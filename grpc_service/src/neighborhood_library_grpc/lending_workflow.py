@@ -1,9 +1,10 @@
-"""Transactional helpers for chatty LendingService RPCs.
+"""PostgreSQL transaction helpers for lending workflows (called from gRPC servicers).
 
-RPC handlers stay small; multi-step invariants are enforced in one DB transaction
-per mutating workflow (start borrow, complete return) so REST can call several
-RPCs in sequence without leaving inconsistent state if StartBorrow already
-commits the full transition.
+Handlers keep RPC methods thin: ``start_borrow_workflow`` and ``complete_return_workflow`` run inside
+``conn.transaction()`` so borrow/return rows and ``book_copies.status`` stay consistent. Idempotent
+helpers support the extra “repair” RPCs the REST gateway issues after the transactional step.
+
+Future: policy plugins (loan limits), audit triggers, or saga outbox for downstream systems.
 """
 
 from __future__ import annotations
@@ -14,22 +15,25 @@ from typing import Any
 import grpc
 from psycopg import Connection
 
+from neighborhood_library_grpc.domain_validation import copy_availability_reason
+
 
 @dataclass(frozen=True)
 class LendingWorkflowError(Exception):
-    """Maps to gRPC status in the servicer."""
+    """Domain failure carrying a gRPC status code and detail string for ``context.abort``."""
 
     code: grpc.StatusCode
     message: str
 
     def __str__(self) -> str:  # pragma: no cover - for logging
+        """Return the human-oriented message (same as ``message`` field)."""
         return self.message
 
 
 def start_borrow_workflow(conn: Connection[Any], member_id: str, copy_id: str, due_at: str) -> tuple[Any, ...]:
-    """
-    Single transaction: validate member and copy, insert borrow row, mark copy on_loan.
-    Caller must wrap in conn.transaction() and commit.
+    """Within one transaction: verify member, lock copy row, insert open borrow, set copy ``on_loan``.
+
+    Raises :class:`LendingWorkflowError` for business failures; caller must commit the transaction.
     """
     with conn.cursor() as cur:
         cur.execute("SELECT 1 FROM members WHERE id = %s", (member_id,))
@@ -42,10 +46,8 @@ def start_borrow_workflow(conn: Connection[Any], member_id: str, copy_id: str, d
             raise LendingWorkflowError(grpc.StatusCode.NOT_FOUND, f"copy not found: {copy_id}")
         status = row[0]
         if status != "available":
-            raise LendingWorkflowError(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                f"copy is not available (status={status})",
-            )
+            _ok, reason = copy_availability_reason(status)
+            raise LendingWorkflowError(grpc.StatusCode.FAILED_PRECONDITION, reason)
 
         cur.execute(
             """
@@ -77,7 +79,10 @@ def start_borrow_workflow(conn: Connection[Any], member_id: str, copy_id: str, d
 
 
 def mark_copy_on_loan_idempotent(conn: Connection[Any], copy_id: str) -> bool:
-    """Idempotent for REST sequences after StartBorrow; repairs if copy is available but an open borrow exists."""
+    """Ensure ``book_copies.status`` is ``on_loan`` when an open borrow exists (no-op if already on loan).
+
+    Used after ``StartBorrow`` in chatty clients; can “repair” inconsistent shelf state defensively.
+    """
     with conn.cursor() as cur:
         cur.execute("SELECT status::text FROM book_copies WHERE id = %s FOR UPDATE", (copy_id,))
         row = cur.fetchone()
@@ -87,10 +92,8 @@ def mark_copy_on_loan_idempotent(conn: Connection[Any], copy_id: str) -> bool:
         if status == "on_loan":
             return True
         if status != "available":
-            raise LendingWorkflowError(
-                grpc.StatusCode.FAILED_PRECONDITION,
-                f"copy cannot be marked on loan (status={status})",
-            )
+            _ok, reason = copy_availability_reason(status)
+            raise LendingWorkflowError(grpc.StatusCode.FAILED_PRECONDITION, reason)
         cur.execute(
             """
             UPDATE book_copies
@@ -117,7 +120,10 @@ def complete_return_workflow(
     borrow_record_id: str,
     returned_at: str,
 ) -> tuple[Any, ...]:
-    """Single transaction: close borrow row and mark copy available."""
+    """Close a borrow by primary key: set ``returned_at``, flip copy to ``available``, return updated row tuple.
+
+    Aborts with ``ABORTED`` if the loan was already returned.
+    """
     with conn.cursor() as cur:
         cur.execute(
             """
@@ -173,7 +179,7 @@ def complete_return_workflow(
 
 
 def mark_copy_available_idempotent(conn: Connection[Any], copy_id: str) -> bool:
-    """Idempotent after ReturnBorrow; sets available when copy is on_loan and there is no open borrow."""
+    """After ``ReturnBorrow``, ensure copy is ``available`` if no open loan remains (no-op if already available)."""
     with conn.cursor() as cur:
         cur.execute("SELECT status::text FROM book_copies WHERE id = %s FOR UPDATE", (copy_id,))
         row = cur.fetchone()

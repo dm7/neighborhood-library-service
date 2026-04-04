@@ -1,4 +1,7 @@
-"""Shared MongoDB event schema with gRPC service (analytics / process-flow)."""
+"""Append-only operational events to MongoDB (same collection shape as ``grpc_service``).
+
+Used for startup/readiness auditing. When ``MONGODB_URI`` is unset, functions no-op safely.
+"""
 
 from __future__ import annotations
 
@@ -12,6 +15,7 @@ from pymongo.errors import PyMongoError
 
 
 def _collection() -> Collection | None:
+    """Return the ``service_events`` collection or None if Mongo is not configured."""
     uri = os.environ.get("MONGODB_URI", "").strip()
     if not uri:
         return None
@@ -26,6 +30,7 @@ def log_service_event(
     *,
     extra: dict[str, Any] | None = None,
 ) -> bool:
+    """Insert one document with ``service``, ``event``, UTC ``ts``, and optional ``extra`` JSON-safe dict."""
     coll = _collection()
     if coll is None:
         return False
