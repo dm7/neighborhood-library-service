@@ -1,4 +1,7 @@
-"""Append-only event documents for process-flow checks and analytics."""
+"""MongoDB sink for lightweight operational events from the gRPC process.
+
+Same document shape as the REST gateway module so dashboards can aggregate across services.
+"""
 
 from __future__ import annotations
 
@@ -12,6 +15,7 @@ from pymongo.errors import PyMongoError
 
 
 def _collection() -> Collection | None:
+    """Lazy Mongo handle for ``{MONGODB_DB}.service_events``; None when ``MONGODB_URI`` is unset."""
     uri = os.environ.get("MONGODB_URI", "").strip()
     if not uri:
         return None

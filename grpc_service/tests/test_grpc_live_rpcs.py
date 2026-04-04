@@ -143,6 +143,22 @@ def test_lending_check_copy_availability_on_loan(grpc_integration_channel: grpc.
         timeout=10,
     )
     assert resp.available is False
+    assert resp.reason == "copy_already_checked_out"
+
+
+def test_lending_start_borrow_on_checked_out_copy(grpc_integration_channel: grpc.Channel) -> None:
+    stub = library_pb2_grpc.LendingServiceStub(grpc_integration_channel)
+    with pytest.raises(grpc.RpcError) as excinfo:
+        stub.StartBorrow(
+            library_pb2.StartBorrowRequest(
+                member_id=SEED_MEMBER,
+                copy_id=SEED_COPY_ON_LOAN,
+                due_at="2027-07-01T12:00:00+00:00",
+            ),
+            timeout=10,
+        )
+    assert excinfo.value.code() == grpc.StatusCode.FAILED_PRECONDITION
+    assert excinfo.value.details() == "copy_already_checked_out"
 
 
 def test_lending_get_open_borrow_by_copy(grpc_integration_channel: grpc.Channel) -> None:

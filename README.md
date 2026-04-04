@@ -174,9 +174,40 @@ cd ../rest_gateway && pip install -e ".[dev]" && pytest
 cd frontend && npm install && npm test
 ```
 
+**Integration (live services):**
+
+```bash
+# gRPC against a running grpc_service + migrated Postgres
+export RUN_INTEGRATION=1 GRPC_TARGET=localhost:50051
+cd grpc_service && pytest tests/test_grpc_live_rpcs.py -v
+
+# REST against a running gateway
+export RUN_INTEGRATION=1 REST_BASE_URL=http://localhost:8080
+cd rest_gateway && pytest tests/test_rest_live.py -v
+```
+
+**Optional HTTP smoke** (read-only; expects seed data):
+
+```bash
+REST_BASE_URL=http://localhost:8080 ./scripts/rest_smoke.sh
+```
+
+## Testing and API errors (evaluation)
+
+| gRPC code | Typical case | REST status |
+|-----------|----------------|-------------|
+| `INVALID_ARGUMENT` | Bad field values, bad timestamps | 400 |
+| `NOT_FOUND` | Missing book, member, or open borrow | 404 |
+| `ALREADY_EXISTS` | Duplicate ISBN or email | 409 |
+| `FAILED_PRECONDITION` | Copy not available (e.g. **already checked out**), bad shelf state | 409 |
+| `ABORTED` | Idempotent conflict (e.g. already returned) | 409 |
+| `UNAVAILABLE` | Backend / gRPC down | 503 |
+
+`POST /api/borrow` runs internal `CheckMemberEligibility` and `CheckCopyAvailability` first: unknown member or copy → **404**; `copy_already_checked_out` (and related codes) → **409** with the reason string in `detail`. Proto comments in `proto/library/v1/library.proto` document `CheckCopyAvailabilityResponse.reason` values.
+
 ## Documentation
 
-See [docs/architecture.md](docs/architecture.md) for process model, data stores, and event schema.
+See [docs/architecture.md](docs/architecture.md) for process model, data stores, and event schema, and [docs/schema.md](docs/schema.md) for PostgreSQL relationships and invariants.
 
 ## Git and Husky
 

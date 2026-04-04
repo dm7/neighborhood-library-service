@@ -17,7 +17,7 @@ Two Python processes, orchestrated by Docker Compose:
 
 | Store | Purpose |
 |-------|---------|
-| **PostgreSQL** | Normalized library domain data. **Day 2:** `books`, `members`, `book_copies` (physical items), `borrow_records` (loans; partial unique index enforces one open loan per copy). Migrations + seed: `db/migrations/`. |
+| **PostgreSQL** | Normalized library domain data. **Day 2:** `books`, `members`, `book_copies` (physical items), `borrow_records` (loans; partial unique index enforces one open loan per copy). Later migrations add CHECK constraints for text and years. Migrations + seed: `db/migrations/`. See [schema.md](schema.md) for the ER model and invariants. |
 | **MongoDB** | **Operational and analytics-oriented events** — startup, readiness probes, RPC markers, and future metrics-friendly documents. Not the system of record for lending state. |
 
 ### MongoDB event schema (`library_ops.service_events`)
@@ -34,9 +34,10 @@ Documents are append-only and **explicitly keyed** for rollups and dashboards:
 ## Interfaces (Day 3)
 
 - **REST:** `GET /health` — liveness, `GET /health/ready` — dependency matrix, plus external book/member proxy routes:
-  `GET/POST/PUT /books` and `GET/POST/PUT /members`.
+  `GET/POST/PUT /books` and `GET/POST/PUT /members`, and lending aggregates `POST /api/borrow`, `GET /api/members/{id}/borrowed`, `POST /api/return`.
+  Request bodies are validated with Pydantic (422 on bad input). Borrow conflicts (e.g. copy already on loan) map to **409** with a stable `detail` string; missing member/copy on the pre-check path map to **404**.
 - **gRPC:** internal-only services: `LibraryService/Ping` (connectivity), `BookService` + `MemberService` CRUD RPCs, and a chatty `LendingService` borrow/return workflow surface.
-  Standard **gRPC Health Checking Protocol** (`grpc.health.v1.Health`) is also registered for ops probes.
+  `CheckCopyAvailabilityResponse.reason` uses machine-stable codes (see comments in `proto/library/v1/library.proto`). Standard **gRPC Health Checking Protocol** (`grpc.health.v1.Health`) is also registered for ops probes.
 
 ## Repository layout
 

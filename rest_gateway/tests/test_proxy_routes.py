@@ -82,10 +82,12 @@ def test_api_members_borrowed_proxy(monkeypatch) -> None:
 
 
 def test_api_borrow_chatty(monkeypatch) -> None:
+    mid = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0001"
+    cid = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0001"
     rec = SimpleNamespace(
         id="br1",
-        copy_id="c1",
-        member_id="m1",
+        copy_id=cid,
+        member_id=mid,
         borrowed_at="2026-01-01T00:00:00Z",
         due_at="2026-02-01T00:00:00Z",
         returned_at="",
@@ -99,15 +101,15 @@ def test_api_borrow_chatty(monkeypatch) -> None:
         resp = client.post(
             "/api/borrow",
             json={
-                "member_id": "m1",
-                "copy_id": "c1",
+                "member_id": mid,
+                "copy_id": cid,
                 "due_at": "2026-06-01T00:00:00+00:00",
             },
         )
     assert resp.status_code == 201
     body = resp.json()
     assert body["id"] == "br1"
-    assert body["copy_id"] == "c1"
+    assert body["copy_id"] == cid
 
 
 def test_api_borrow_precondition_failed(monkeypatch) -> None:
@@ -115,16 +117,18 @@ def test_api_borrow_precondition_failed(monkeypatch) -> None:
         raise LendingPreconditionFailed("copy_not_available")
 
     monkeypatch.setattr("neighborhood_library_gateway.app.borrow_book_chatty", _reject)
+    mid = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaa0001"
+    cid = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbb0001"
     with TestClient(app) as client:
         resp = client.post(
             "/api/borrow",
             json={
-                "member_id": "m1",
-                "copy_id": "c1",
+                "member_id": mid,
+                "copy_id": cid,
                 "due_at": "2026-06-01T00:00:00+00:00",
             },
         )
-    assert resp.status_code == 400
+    assert resp.status_code == 409
     assert resp.json()["detail"] == "copy_not_available"
 
 
@@ -141,6 +145,7 @@ def test_grpc_to_http_maps_conflict_statuses() -> None:
 
     assert _grpc_to_http(_Err(grpc.StatusCode.ALREADY_EXISTS)).status_code == 409
     assert _grpc_to_http(_Err(grpc.StatusCode.ABORTED)).status_code == 409
+    assert _grpc_to_http(_Err(grpc.StatusCode.FAILED_PRECONDITION)).status_code == 409
 
 
 def test_members_create_proxy(monkeypatch) -> None:

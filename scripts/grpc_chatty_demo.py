@@ -34,6 +34,7 @@ from library.v1 import library_pb2_grpc
 
 
 def _parse_args() -> argparse.Namespace:
+    """Parse CLI flags defaulting to seed UUIDs from ``002_seed.sql``."""
     p = argparse.ArgumentParser(description="Chatty LendingService gRPC demo (internal-style calls).")
     p.add_argument(
         "--member-id",
@@ -54,6 +55,7 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Execute Ping, chatty borrow, list loans, chatty return; print each RPC outcome to stdout."""
     args = _parse_args()
     target = os.environ.get("GRPC_TARGET", "localhost:50051").strip()
     due = args.due_at.strip()

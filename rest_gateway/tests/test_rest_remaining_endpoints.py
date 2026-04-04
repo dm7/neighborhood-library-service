@@ -115,7 +115,10 @@ def test_post_api_return_proxies_grpc(monkeypatch) -> None:
         lambda copy_id, returned_at=None: rec,
     )
     with TestClient(app) as client:
-        resp = client.post("/api/return", json={"copy_id": "c9", "returned_at": ""})
+        resp = client.post(
+            "/api/return",
+            json={"copy_id": "99999999-9999-9999-9999-999999999009", "returned_at": ""},
+        )
     assert resp.status_code == 200
     body = resp.json()
     assert body["id"] == "br9"

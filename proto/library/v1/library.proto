@@ -119,6 +119,7 @@ message CheckMemberEligibilityRequest {
   string member_id = 1;
 }
 
+// reason when eligible=false: "member_not_found". When eligible=true: "ok".
 message CheckMemberEligibilityResponse {
   bool eligible = 1;
   string reason = 2;
@@ -128,6 +129,8 @@ message CheckCopyAvailabilityRequest {
   string copy_id = 1;
 }
 
+// When available=false, reason is machine-stable: "copy_not_found", "copy_already_checked_out",
+// "copy_unavailable_lost", "copy_unavailable_retired", "copy_unavailable_other". When available=true: "ok".
 message CheckCopyAvailabilityResponse {
   bool available = 1;
   string reason = 2;
